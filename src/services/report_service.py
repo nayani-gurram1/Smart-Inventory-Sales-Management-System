@@ -5,9 +5,8 @@ def orders_report(status=None):
     filtered = [o for o in orders if o["status"] == status] if status else orders
 
     for order in filtered:
-        report_dao.insert_report({
-            "type": "orders",
-            "criteria": status,
+        report_dao.insert_report("orders", {
+            "criteria": f"status={status}",
             "data": order
         })
     return filtered
@@ -22,8 +21,7 @@ def payments_report(status=None, method=None):
         filtered = [p for p in filtered if p["method"] == method]
 
     for payment in filtered:
-        report_dao.insert_report({
-            "type": "payments",
+        report_dao.insert_report("payments", {
             "criteria": f"status={status}, method={method}",
             "data": payment
         })
@@ -37,8 +35,7 @@ def customers_report(min_loyalty=None):
         filtered = [c for c in customers if c.get("loyalty_points", 0) >= min_loyalty]
 
     for customer in filtered:
-        report_dao.insert_report({
-            "type": "customers",
+        report_dao.insert_report("customers", {
             "criteria": f"min_loyalty={min_loyalty}",
             "data": customer
         })
@@ -52,8 +49,7 @@ def revenue_report(start, end):
 
     revenue = sum(o["total_amount"] for o in filtered)
 
-    report_dao.insert_report({
-        "type": "revenue",
+    report_dao.insert_report("revenue", {
         "criteria": f"{start} to {end}",
         "data": {"total_revenue": revenue}
     })
