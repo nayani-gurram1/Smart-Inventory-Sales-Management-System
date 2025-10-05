@@ -1,40 +1,30 @@
-import json
-import os
-
-REPORT_FILE = "reports.json"
-
-_reports = []
-
-def _load_reports():
-    global _reports
-    if os.path.exists(REPORT_FILE):
-        with open(REPORT_FILE, "r") as f:
-            _reports = json.load(f)
-    return _reports
-
-def _save_reports():
-    global _reports
-    with open(REPORT_FILE, "w") as f:
-        json.dump(_reports, f, indent=2)
-
-def insert_report(report_data):
-    global _reports
-    _load_reports()
-    _reports.append(report_data)
-    _save_reports()
-
-def list_reports():
-    return _load_reports()
 from src.config import get_supabase
 
 supabase = get_supabase()
 
-def insert_report(report_type, data):
-    supabase.table("reports").insert({
+def insert_report(report_type: str, data: dict):
+    """
+    Insert a new report into the 'reports' table.
+    Works with the latest supabase-py client.
+    """
+    response = supabase.table("reports").insert({
         "report_type": report_type,
         "data": data
     }).execute()
 
+    res_dict = response.model_dump()
+
+    # ✅ Check if 'data' exists and is non-empty to confirm success
+    if not res_dict.get("data"):
+        raise Exception(f"Failed to insert report: {res_dict}")
+
+    return res_dict.get("data")
+
 def list_reports():
-    response = supabase.table("reports").select("*").execute()
-    return response.data
+    """
+    Retrieve all reports from the 'reports' table.
+    """
+    response = supabase.table("reports").select("*").order("report_id", desc=True).execute()
+    res_dict = response.model_dump()
+
+    return res_dict.get("data", [])
