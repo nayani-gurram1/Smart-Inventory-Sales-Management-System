@@ -1,7 +1,7 @@
 import os
 import sys
 import streamlit as st
-
+import pandas as pd
 # ✅ Add src to sys.path
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.join(ROOT_DIR, "src")
@@ -152,13 +152,36 @@ elif page == "📈 Reports":
         except Exception as e:
             st.error(f"Error generating report: {e}")
 
-    st.subheader("📝 Saved Reports")
+        st.subheader("📝 Saved Reports")
     try:
-        if hasattr(report_service, "list_reports"):
-            reports = report_service.list_reports()
-            if reports:
-                st.dataframe(reports, use_container_width=True)
-            else:
-                st.info("No reports saved yet.")
+        reports = report_service.list_reports()
+        if reports:
+            headers = ["Report ID", "Report Type", "Criteria", "Data", "Generated At"]
+            rows = []
+
+            for r in reports:
+                data_field = r.get("data", {})
+                criteria = ""
+                data_str = ""
+
+                if isinstance(data_field, dict):
+                    criteria = data_field.get("criteria", "")
+                    data_str = str(data_field.get("data", ""))
+                else:
+                    data_str = str(data_field)
+
+                rows.append([
+                    r.get("report_id", ""),
+                    r.get("report_type", ""),
+                    criteria,
+                    data_str,
+                    r.get("generated_at", "")
+                ])
+
+            st.table([headers] + rows)
+        else:
+            st.info("No reports saved yet.")
     except Exception as e:
         st.error(f"Error loading reports: {e}")
+
+ 
