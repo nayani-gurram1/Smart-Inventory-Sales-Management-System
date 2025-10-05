@@ -55,5 +55,6 @@ def revenue_report(start, end):
     })
     return {"total_revenue": revenue}
 
-def list_all_reports():
+def list_reports():
     return report_dao.list_reports()
+
