@@ -138,35 +138,47 @@ elif page == "💳 Payments":
         st.error(f"Error loading payments: {e}")
 
 # ===============================
-# 📈 REPORTS PAGE
+# 📈 REPORTS PAGE (FIXED)
 # ===============================
 elif page == "📈 Reports":
     st.header("📈 Generate Orders Report")
 
     status = st.selectbox("Select Order Status", ["COMPLETED", "PENDING", "CANCELLED"])
+
+    # ✅ Generate report for selected status
     if st.button("Generate Report"):
         try:
             report_data = report_service.orders_report(status)
             st.success(f"Report generated for {status} orders.")
-            st.json(report_data)
+            if report_data:
+                st.json(report_data)
+            else:
+                st.info(f"No {status} orders found.")
         except Exception as e:
             st.error(f"Error generating report: {e}")
 
-        st.subheader("📝 Saved Reports")
+    # ✅ Show filtered saved reports
+    st.subheader("📝 Saved Reports")
     try:
         reports = report_service.list_reports()
+
+        # 👉 Filter reports by selected status (criteria string)
+        reports = [
+            r for r in reports
+            if f"status={status}" in r.get("criteria", "")
+        ]
+
         if reports:
             headers = ["Report ID", "Report Type", "Criteria", "Data", "Generated At"]
             rows = []
 
             for r in reports:
                 data_field = r.get("data", {})
-                criteria = ""
+                criteria = r.get("criteria", "")
                 data_str = ""
 
                 if isinstance(data_field, dict):
-                    criteria = data_field.get("criteria", "")
-                    data_str = str(data_field.get("data", ""))
+                    data_str = str(data_field)
                 else:
                     data_str = str(data_field)
 
@@ -180,8 +192,7 @@ elif page == "📈 Reports":
 
             st.table([headers] + rows)
         else:
-            st.info("No reports saved yet.")
+            st.info(f"No saved {status} reports found.")
     except Exception as e:
         st.error(f"Error loading reports: {e}")
 
- 
