@@ -59,7 +59,7 @@ elif page == "📦 Products":
     st.header("📦 Manage Products")
 
     if st.button("🔄 Refresh Products"):
-        st.experimental_rerun()
+        st.rerun()
 
     try:
         products = product_service.list_products()
@@ -82,7 +82,7 @@ elif page == "📦 Products":
             try:
                 product_service.add_product(name, sku, price, int(stock), category)
                 st.success(f"✅ Product '{name}' added successfully!")
-                st.experimental_rerun()
+                st.rerun()
             except Exception as e:
                 st.error(f"Failed to add product: {e}")
 
