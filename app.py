@@ -138,7 +138,7 @@ elif page == "💳 Payments":
         st.error(f"Error loading payments: {e}")
 
 # ===============================
-# 📈 REPORTS PAGE (FIXED)
+# 📈 REPORTS PAGE (FINAL FIX)
 # ===============================
 elif page == "📈 Reports":
     st.header("📈 Generate Orders Report")
@@ -157,15 +157,15 @@ elif page == "📈 Reports":
         except Exception as e:
             st.error(f"Error generating report: {e}")
 
-    # ✅ Show filtered saved reports
+    # ✅ Show filtered saved reports in table format
     st.subheader("📝 Saved Reports")
     try:
         reports = report_service.list_reports()
 
-        # 👉 Filter reports by selected status (criteria string)
+        # ✅ Match both "status=STATUS" or plain "STATUS" in criteria
         reports = [
             r for r in reports
-            if f"status={status}" in r.get("criteria", "")
+            if status in r.get("criteria", "") or f"status={status}" in r.get("criteria", "")
         ]
 
         if reports:
@@ -175,12 +175,7 @@ elif page == "📈 Reports":
             for r in reports:
                 data_field = r.get("data", {})
                 criteria = r.get("criteria", "")
-                data_str = ""
-
-                if isinstance(data_field, dict):
-                    data_str = str(data_field)
-                else:
-                    data_str = str(data_field)
+                data_str = str(data_field) if isinstance(data_field, dict) else str(data_field)
 
                 rows.append([
                     r.get("report_id", ""),
@@ -190,9 +185,9 @@ elif page == "📈 Reports":
                     r.get("generated_at", "")
                 ])
 
+            # ✅ Display clean table
             st.table([headers] + rows)
         else:
             st.info(f"No saved {status} reports found.")
     except Exception as e:
         st.error(f"Error loading reports: {e}")
-
